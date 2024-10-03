@@ -1,0 +1,28 @@
+FROM ubuntu AS git
+
+RUN apt-get update && apt-get install -y git
+
+WORKDIR /app
+
+RUN git clone https://github.com/AndreSiF/Maven-WebApp-With-Postgres-Implementation /app/repo
+
+
+FROM maven:3.9.8-amazoncorretto-17 AS build
+
+WORKDIR /app
+
+COPY --from=git /app/repo/Gerenciamento_de_Abrigos/pom.xml .
+COPY --from=git /app/repo/Gerenciamento_de_Abrigos/src ./src
+
+RUN mvn clean package
+
+
+FROM tomcat
+
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+COPY --from=build /app/target/Gerenciamento_de_Abrigos.war /usr/local/tomcat/webapps/ROOT.war
+
+EXPOSE 8080
+
+CMD ["catalina.sh", "run"]
