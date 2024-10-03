@@ -1,0 +1,14 @@
+FROM ubuntu AS git
+
+RUN apt-get update && apt-get install -y git
+
+WORKDIR /app
+
+RUN git clone https://github.com/AndreSiF/Maven-WebApp-With-Postgres-Implementation /app/repo
+
+
+FROM postgres:latest
+
+EXPOSE 5432
+
+COPY --from=git /app/repo/Gerenciamento_de_Abrigos/db.sql /docker-entrypoint-initdb.d/
